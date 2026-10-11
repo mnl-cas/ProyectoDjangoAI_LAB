@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Alertas{% endblock %}
+{% block container_class %}medium{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div><p class="eyebrow">Inventario</p><h1>Alertas</h1><p class="sub">{{ abiertas }} abierta{{ abiertas|pluralize }}.</p></div>
+  <div class="actions">
+    <a class="btn {% if ver != 'abiertas' %}secondary{% endif %} small" href="?ver=abiertas">Abiertas</a>
+    <a class="btn {% if ver != 'resueltas' %}secondary{% endif %} small" href="?ver=resueltas">Resueltas</a>
+    <a class="btn {% if ver != 'todas' %}secondary{% endif %} small" href="?ver=todas">Todas</a>
+  </div>
+</div>
+
+<div class="card">
+  {% if alertas %}
+  <ul class="list">
+    {% for a in alertas %}
+    <li>
+      <div>
+        <span class="badge {% if a.is_resolved %}{% elif a.kind == 'OUT_OF_STOCK' %}red{% elif a.kind == 'LOW_STOCK' %}orange{% else %}blue{% endif %}">{{ a.get_kind_display }}</span>
+        <div class="title" style="margin-top:6px">{{ a.message }}</div>
+        <div class="meta"><a href="{% url 'product_detail' a.product.pk %}">{{ a.product.name }}</a> · {{ a.created_at|date:"d M Y, H:i" }}</div>
+      </div>
+      {% if not a.is_resolved and perms.inventory.change_alert %}
+      <form method="post" action="{% url 'alert_resolve' a.pk %}" class="inline" data-confirm-title="¿Marcar como resuelta?" data-confirm="La alerta dejará de aparecer entre las abiertas." data-confirm-button="Resolver">
+        {% csrf_token %}<button class="btn secondary small" type="submit">Resolver</button>
+      </form>
+      {% elif a.is_resolved %}<span class="badge green">Resuelta</span>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <div class="empty"><h3>Sin alertas</h3><p>Aquí aparecerán los productos con stock bajo o con diferencias detectadas.</p></div>
+  {% endif %}
+</div>
+{% endblock %}

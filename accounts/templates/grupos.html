@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Grupos{% endblock %}
+{% block container_class %}medium{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div><p class="eyebrow">Administración</p><h1>Grupos</h1><p class="sub">Los grupos agrupan usuarios con los mismos permisos.</p></div>
+  <a href="{% url 'permisos' %}" class="btn secondary">Gestionar permisos</a>
+</div>
+
+<div class="card"><div class="card-body">
+  <form method="post" class="search" style="margin:0">
+    {% csrf_token %}
+    <input type="text" name="nombre_grupo" placeholder="Nombre del nuevo grupo" maxlength="150" required>
+    <button class="btn" type="submit">Crear grupo</button>
+  </form>
+</div></div>
+
+<div class="card">
+  {% if grupos %}
+  <ul class="list">
+    {% for g in grupos %}
+    <li>
+      <div>
+        <span class="title">{{ g.name }}</span>
+        <div class="meta">{{ g.user_set.all|length }} miembro{{ g.user_set.all|length|pluralize }} · {{ g.permissions.all|length }} permiso{{ g.permissions.all|length|pluralize }}</div>
+      </div>
+      <div class="actions">
+        <a href="{% url 'permisos' %}?grupo={{ g.pk }}" class="btn ghost small">Permisos</a>
+        <a href="{% url 'editar_grupo' g.pk %}" class="btn ghost small">Editar</a>
+        {% if g.name not in protegidos %}
+        <form method="post" action="{% url 'eliminar_grupo' g.pk %}" class="inline" data-danger data-confirm-title="¿Eliminar grupo?" data-confirm="«{{ g.name }}» se eliminará y sus miembros perderán estos permisos." data-confirm-button="Eliminar">
+          {% csrf_token %}<button class="btn danger small" type="submit">Eliminar</button>
+        </form>
+        {% else %}<span class="badge">Sistema</span>{% endif %}
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <div class="empty"><h3>No hay grupos</h3><p>Crea el primero con el formulario de arriba.</p></div>
+  {% endif %}
+</div>
+{% endblock %}

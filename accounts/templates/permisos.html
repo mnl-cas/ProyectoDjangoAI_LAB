@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Permisos{% endblock %}
+{% block container_class %}medium{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div><p class="eyebrow">Administración</p><h1>Permisos</h1><p class="sub">Elige un grupo y define qué puede hacer.</p></div>
+</div>
+
+{% if grupo %}
+<form method="post" action="{% url 'permisos' %}">
+  {% csrf_token %}
+  <div class="card">
+    <div class="card-body">
+      <label class="label" for="grupo">Grupo</label>
+      <select name="grupo" id="grupo" onchange="window.location.href='?grupo=' + this.value">
+        {% for g in grupos %}<option value="{{ g.id }}" {% if g.id == grupo.id %}selected{% endif %}>{{ g.name }}</option>{% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="card">
+    {% for etiqueta, lista in secciones.items %}
+    <div class="perm-section">
+      <h4>{{ etiqueta }}</h4>
+      <div class="perm-grid">
+        {% for p in lista %}
+        <label class="check">
+          <input type="checkbox" name="permisos" value="{{ p.id }}" {% if p.id in permisos_grupo %}checked{% endif %}>
+          <span>{{ p.name }}</span>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="form-actions"><a href="{% url 'grupos' %}" class="btn secondary">Volver</a><button type="submit" class="btn">Guardar permisos</button></div>
+</form>
+{% else %}
+<div class="card"><div class="empty"><h3>No hay grupos</h3><p><a href="{% url 'grupos' %}">Crea un grupo</a> para asignarle permisos.</p></div></div>
+{% endif %}
+{% endblock %}

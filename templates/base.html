@@ -1,0 +1,58 @@
+{% load static %}<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>{% block title %}VisionStock{% endblock %} · VisionStock</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.5/dist/sweetalert2.all.min.js"></script>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="{% url 'home' %}">
+      <span class="brand-mark">{% include 'partials/logo.svg' %}</span>
+      VisionStock
+    </a>
+
+    {% if user.is_authenticated %}
+    <nav class="nav-links">
+      <a class="nav-link" href="{% url 'home' %}">Inicio</a>
+      {% if perms.catalog.view_product %}<a class="nav-link" href="{% url 'product_list' %}">Productos</a>{% endif %}
+      {% if perms.inventory.view_stockmovement %}<a class="nav-link" href="{% url 'movement_list' %}">Inventario</a>{% endif %}
+      {% if perms.inventory.view_alert %}
+        <a class="nav-link" href="{% url 'alert_list' %}">Alertas{% if alertas_abiertas %}<span class="nav-count">{{ alertas_abiertas }}</span>{% endif %}</a>
+      {% endif %}
+      {% if perms.vision.add_inspection %}<a class="nav-link" href="{% url 'inspection_create' %}">Analizar</a>{% endif %}
+      {% if perms.vision.view_inspection %}<a class="nav-link" href="{% url 'inspection_list' %}">Historial</a>{% endif %}
+      {% if user.is_staff %}
+        <a class="nav-link" href="{% url 'usuarios' %}">Usuarios</a>
+        <a class="nav-link" href="{% url 'grupos' %}">Grupos</a>
+        <a class="nav-link" href="{% url 'permisos' %}">Permisos</a>
+      {% endif %}
+    </nav>
+
+    <div class="nav-user">
+      <span class="avatar" title="{{ user.username }}">{{ user.username|slice:":1"|upper }}</span>
+      <span class="who">{{ user.first_name|default:user.username }}</span>
+      <form method="post" action="{% url 'logout' %}" class="inline" data-confirm="Se cerrará tu sesión en este equipo." data-confirm-title="¿Cerrar sesión?" data-confirm-button="Cerrar sesión">
+        {% csrf_token %}
+        <button type="submit" class="btn secondary small">Salir</button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+</header>
+
+<main class="container {% block container_class %}{% endblock %}">
+  {% block content %}{% endblock %}
+</main>
+
+{% for m in messages %}<div hidden data-flash="{{ m.tags }}">{{ m }}</div>{% endfor %}
+
+<script src="{% static 'js/app.js' %}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

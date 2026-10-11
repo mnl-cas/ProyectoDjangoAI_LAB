@@ -1,0 +1,21 @@
+{% load static %}<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>{% block title %}Acceso{% endblock %} · VisionStock</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.5/dist/sweetalert2.all.min.js"></script>
+</head>
+<body>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="logo">{% include 'partials/logo.svg' %}</div>
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+  {% for m in messages %}<div hidden data-flash="{{ m.tags }}">{{ m }}</div>{% endfor %}
+  <script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>

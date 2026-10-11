@@ -1,0 +1,12 @@
+Django==6.1.1
+Pillow==12.3.0
+numpy==2.5.4
+opencv-python==5.0.0.93
+pi-heif==1.4.0
+ultralytics==8.4.175
+sentence-transformers==6.1.0
+transformers==5.19.0
+# PyTorch (CPU). Instalar antes con:
+#   pip install torch==2.14.1 torchvision==0.29.1 --index-url https://download.pytorch.org/whl/cpu
+torch==2.14.1
+torchvision==0.29.1

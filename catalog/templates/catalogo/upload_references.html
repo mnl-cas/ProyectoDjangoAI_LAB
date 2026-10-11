@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Referencias de {{ product.name }}{% endblock %}
+{% block container_class %}medium{% endblock %}
+
+{% block content %}
+<a class="back" href="{% url 'product_detail' product.pk %}">‹ {{ product.name }}</a>
+<div class="page-head">
+  <div>
+    <p class="eyebrow">Imágenes de referencia</p>
+    <h1>{{ product.name }}</h1>
+    <p class="sub">Con 3 a 5 fotos claras del producto, el análisis podrá reconocerlo en una estantería.</p>
+  </div>
+</div>
+
+<div class="card"><div class="card-body">
+  <form method="post" enctype="multipart/form-data" data-loading="Procesando imágenes…">
+    {% csrf_token %}
+    <label class="dropzone">
+      <strong data-filename>Arrastra tus fotos aquí</strong>
+      <span>o haz clic para elegirlas</span>
+      <input type="file" name="image" accept="image/*" multiple required>
+    </label>
+    <div class="form-actions"><span></span><button type="submit" class="btn">Subir referencias</button></div>
+  </form>
+</div></div>
+
+<div class="card">
+  <div class="card-head"><h3>Referencias guardadas ({{ references|length }})</h3></div>
+  {% if references %}
+  <div class="thumbs">
+    {% for r in references %}
+    <div class="thumb">
+      <img src="{{ r.image.url }}" alt="Referencia">
+      {% if perms.catalog.delete_referenceimage %}
+      <form method="post" action="{% url 'reference_delete' r.pk %}" data-danger data-confirm-title="¿Eliminar imagen?" data-confirm="Se quitará esta referencia del producto." data-confirm-button="Eliminar">
+        {% csrf_token %}<button type="submit" title="Eliminar">×</button>
+      </form>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty"><p>Todavía no hay imágenes de referencia.</p></div>
+  {% endif %}
+</div>
+{% endblock %}

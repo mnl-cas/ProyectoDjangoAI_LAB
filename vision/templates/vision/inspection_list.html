@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Historial de análisis{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div><p class="eyebrow">Visión artificial</p><h1>Historial</h1></div>
+  {% if perms.vision.add_inspection %}<a href="{% url 'inspection_create' %}" class="btn">Nuevo análisis</a>{% endif %}
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Análisis</th><th>Fecha</th><th class="num">Detectadas</th><th class="num">Sin identificar</th><th>Estado</th><th>Por</th><th></th></tr></thead>
+      <tbody>
+        {% for i in inspections %}
+        <tr>
+          <td class="strong"><a href="{% url 'inspection_detail' i.pk %}" style="color:inherit">#{{ i.pk }}</a>{% if i.notes %}<div class="meta small-text muted">{{ i.notes }}</div>{% endif %}</td>
+          <td class="muted">{{ i.created_at|date:"d M Y, H:i" }}</td>
+          <td class="num">{{ i.total_detected }}</td>
+          <td class="num">{{ i.unidentified }}</td>
+          <td>{% if i.applied %}<span class="badge green">Aplicado</span>{% else %}<span class="badge">Pendiente</span>{% endif %}</td>
+          <td class="muted">{{ i.created_by.username|default:"—" }}</td>
+          <td class="actions-cell"><a href="{% url 'inspection_detail' i.pk %}" class="btn ghost small">Ver</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7"><div class="empty"><h3>Sin análisis</h3><p>Sube la primera foto de una estantería.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

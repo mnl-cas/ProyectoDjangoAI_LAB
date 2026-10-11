@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Inventario{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div><p class="eyebrow">Inventario</p><h1>Movimientos</h1></div>
+  {% if perms.inventory.add_stockmovement %}<a href="{% url 'movement_create' %}" class="btn">Registrar movimiento</a>{% endif %}
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Fecha</th><th>Producto</th><th>Tipo</th><th class="num">Cantidad</th><th>Registrado por</th><th>Motivo</th></tr></thead>
+      <tbody>
+        {% for m in movements %}
+        <tr>
+          <td class="muted">{{ m.created_at|date:"d M Y, H:i" }}</td>
+          <td class="strong">{{ m.product.name }}</td>
+          <td><span class="badge {% if m.movement_type == 'IN' %}green{% elif m.movement_type == 'OUT' %}red{% else %}orange{% endif %}">{{ m.get_movement_type_display }}</span></td>
+          <td class="num">{{ m.quantity }}</td>
+          <td class="muted">{{ m.created_by.username|default:"Sistema" }}</td>
+          <td class="muted">{{ m.description|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6"><div class="empty"><h3>Sin movimientos</h3><p>Registra la primera entrada o salida de inventario.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

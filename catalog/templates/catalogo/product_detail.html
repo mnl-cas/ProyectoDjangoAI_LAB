@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block container_class %}medium{% endblock %}
+
+{% block content %}
+<a class="back" href="{% url 'product_list' %}">‹ Productos</a>
+<div class="page-head">
+  <div>
+    <p class="eyebrow">{{ product.category.name|default:"Sin categoría" }}</p>
+    <h1>{{ product.name }}</h1>
+  </div>
+  <div class="actions">
+    {% if perms.inventory.add_stockmovement %}<a class="btn secondary" href="{% url 'movement_create' %}?product={{ product.pk }}">Registrar movimiento</a>{% endif %}
+    {% if perms.catalog.change_product %}<a class="btn" href="{% url 'product_edit' product.pk %}">Editar</a>{% endif %}
+  </div>
+</div>
+
+<div class="grid cols-3">
+  <div class="card stat"><div class="label">Stock</div><div class="value">{{ product.stock }}</div><div class="hint">mínimo {{ product.min_stock }}</div></div>
+  <div class="card stat"><div class="label">Precio</div><div class="value">${{ product.price|floatformat:0 }}</div></div>
+  <div class="card stat {% if product.stock == 0 %}danger{% elif product.is_low_stock %}warn{% endif %}"><div class="label">Estado</div>
+    <div class="value" style="font-size:1.5rem;padding-top:8px">{% if product.stock == 0 %}Agotado{% elif product.is_low_stock %}Stock bajo{% else %}Disponible{% endif %}</div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:18px"><div class="card-body">
+  <dl class="kv">
+    <dt>Descripción</dt><dd>{{ product.description|default:"Sin descripción." }}</dd>
+    <dt>Creado</dt><dd>{{ product.created_at|date:"d M Y" }}</dd>
+  </dl>
+</div></div>
+
+<div class="card">
+  <div class="card-head">
+    <h3>Referencias visuales</h3>
+    {% if perms.catalog.add_referenceimage %}<a href="{% url 'upload_references' product.pk %}" class="btn ghost small">Gestionar</a>{% endif %}
+  </div>
+  {% if references %}
+  <div class="thumbs">{% for r in references|slice:":6" %}<div class="thumb"><img src="{{ r.image.url }}" alt="Referencia"></div>{% endfor %}</div>
+  {% else %}
+  <div class="empty"><h3>Sin imágenes de referencia</h3><p>Sube fotos del producto para que el análisis lo reconozca en las estanterías.</p></div>
+  {% endif %}
+</div>
+
+<div class="card">
+  <div class="card-head"><h3>Movimientos recientes</h3></div>
+  {% if movements %}
+  <ul class="list">
+    {% for m in movements %}
+    <li>
+      <div><span class="title">{{ m.get_movement_type_display }}</span><div class="meta">{{ m.created_at|date:"d M Y, H:i" }} · {{ m.created_by.username|default:"Sistema" }}</div></div>
+      <span class="badge {% if m.movement_type == 'IN' %}green{% elif m.movement_type == 'OUT' %}red{% else %}orange{% endif %}">{{ m.quantity }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <div class="empty"><p>Sin movimientos registrados.</p></div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Registrar movimiento{% endblock %}
+{% block container_class %}narrow{% endblock %}
+
+{% block content %}
+<a class="back" href="{% url 'movement_list' %}">‹ Movimientos</a>
+<div class="page-head"><h1>Registrar movimiento</h1></div>
+
+<div class="card"><div class="card-body">
+  <form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+      <div class="field">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}{{ field.errors }}
+      </div>
+    {% endfor %}
+    <p class="help">«Ajuste» reemplaza el stock actual por la cantidad indicada (útil tras un conteo físico).</p>
+    <div class="form-actions">
+      <a href="{% url 'movement_list' %}" class="btn secondary">Cancelar</a>
+      <button type="submit" class="btn">Guardar movimiento</button>
+    </div>
+  </form>
+</div></div>
+{% endblock %}

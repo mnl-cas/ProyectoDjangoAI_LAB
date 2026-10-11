@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Análisis #{{ inspection.pk }}{% endblock %}
+
+{% block content %}
+<a class="back" href="{% url 'inspection_list' %}">‹ Historial</a>
+<div class="page-head">
+  <div>
+    <p class="eyebrow">{{ inspection.created_at|date:"d M Y, H:i" }}{% if inspection.created_by %} · {{ inspection.created_by.username }}{% endif %}</p>
+    <h1>Análisis #{{ inspection.pk }}</h1>
+    {% if inspection.notes %}<p class="sub">{{ inspection.notes }}</p>{% endif %}
+  </div>
+  <div class="actions">
+    {% if perms.vision.delete_inspection %}
+    <form method="post" action="{% url 'inspection_delete' inspection.pk %}" class="inline" data-danger data-confirm-title="¿Eliminar análisis?" data-confirm="Se borrarán la foto y los resultados." data-confirm-button="Eliminar">
+      {% csrf_token %}<button class="btn danger" type="submit">Eliminar</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="split">
+  <section class="split-media">
+    <div class="card"><div class="card-body">
+      <img class="preview" src="{{ inspection.annotated_image.url }}" alt="Foto analizada">
+      <p class="help">Azul: producto reconocido · Naranja: detectado sin identificar.</p>
+    </div></div>
+  </section>
+
+  <section class="split-data">
+    <div class="mini-stats">
+      <div class="card stat"><div class="label">Detectadas</div><div class="value">{{ inspection.total_detected }}</div></div>
+      <div class="card stat"><div class="label">Reconocidas</div><div class="value">{{ items|length }}</div></div>
+      <div class="card stat {% if inspection.unidentified %}warn{% endif %}"><div class="label">Sin identificar</div><div class="value">{{ inspection.unidentified }}</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Conteo por producto</h3>
+        {% if items and not inspection.applied and perms.vision.change_inspection and perms.inventory.add_stockmovement %}
+        <form method="post" action="{% url 'inspection_apply' inspection.pk %}" class="inline" data-confirm-title="¿Ajustar el inventario?" data-confirm="El stock de cada producto reconocido se reemplazará por el conteo detectado." data-confirm-button="Aplicar ajuste">
+          {% csrf_token %}<button class="btn small" type="submit">Aplicar al inventario</button>
+        </form>
+        {% elif inspection.applied %}<span class="badge green">Aplicado</span>{% endif %}
+      </div>
+      {% if items %}
+      <div class="table-wrap"><table>
+        <thead><tr><th>Producto</th><th class="num">Detect.</th><th class="num">Sistema</th><th class="num">Dif.</th></tr></thead>
+        <tbody>
+          {% for it in items %}
+          <tr>
+            <td class="strong"><a href="{% url 'product_detail' it.product.pk %}" style="color:inherit">{{ it.product.name }}</a></td>
+            <td class="num">{{ it.detected }}</td>
+            <td class="num">{{ it.expected }}</td>
+            <td class="num"><span class="badge {% if it.difference == 0 %}green{% elif it.difference < 0 %}red{% else %}orange{% endif %}">{% if it.difference > 0 %}+{% endif %}{{ it.difference }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table></div>
+      {% else %}
+      <div class="empty"><h3>No se reconoció ningún producto</h3><p>Sube imágenes de referencia en la ficha de cada producto para que el modelo pueda identificarlos.</p></div>
+      {% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}

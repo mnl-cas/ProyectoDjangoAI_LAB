@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Productos{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <p class="eyebrow">Catálogo</p>
+    <h1>Productos</h1>
+  </div>
+  <div class="actions">
+    {% if perms.catalog.view_category %}<a href="{% url 'category_list' %}" class="btn secondary">Categorías</a>{% endif %}
+    {% if perms.catalog.add_product %}<a href="{% url 'product_create' %}" class="btn">Nuevo producto</a>{% endif %}
+  </div>
+</div>
+
+<form class="search" method="get">
+  <input type="search" name="q" value="{{ q }}" placeholder="Buscar producto">
+  <select name="categoria" onchange="this.form.submit()">
+    <option value="">Todas las categorías</option>
+    {% for c in categories %}<option value="{{ c.pk }}" {% if categoria == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+  </select>
+  <button class="btn secondary" type="submit">Buscar</button>
+</form>
+
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Producto</th><th>Categoría</th><th class="num">Precio</th><th class="num">Stock</th><th></th></tr></thead>
+      <tbody>
+        {% for product in products %}
+        <tr>
+          <td class="strong"><a href="{% url 'product_detail' product.pk %}" style="color:inherit">{{ product.name }}</a></td>
+          <td class="muted">{{ product.category.name|default:"Sin categoría" }}</td>
+          <td class="num">${{ product.price|floatformat:2 }}</td>
+          <td class="num">
+            <span class="badge {% if product.stock == 0 %}red{% elif product.is_low_stock %}orange{% else %}green{% endif %}">{{ product.stock }}</span>
+          </td>
+          <td class="actions-cell">
+            <a href="{% url 'product_detail' product.pk %}" class="btn ghost small">Ver</a>
+            {% if perms.catalog.change_product %}<a href="{% url 'product_edit' product.pk %}" class="btn ghost small">Editar</a>{% endif %}
+            {% if perms.catalog.delete_product %}
+            <form method="post" action="{% url 'product_delete' product.pk %}" class="inline" data-danger data-confirm-title="¿Eliminar producto?" data-confirm="«{{ product.name }}» se eliminará junto con su historial. Esta acción no se puede deshacer." data-confirm-button="Eliminar">
+              {% csrf_token %}<button class="btn danger small" type="submit">Eliminar</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5"><div class="empty"><h3>No hay productos</h3><p>{% if q or categoria %}Prueba con otra búsqueda.{% else %}Crea el primero para empezar a controlar tu inventario.{% endif %}</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

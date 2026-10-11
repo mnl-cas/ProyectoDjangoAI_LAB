@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Editar grupo{% endblock %}
+{% block container_class %}medium{% endblock %}
+
+{% block content %}
+<a class="back" href="{% url 'grupos' %}">‹ Grupos</a>
+<div class="page-head"><div><p class="eyebrow">Grupo #{{ grupo.id }}</p><h1>{{ grupo.name }}</h1></div></div>
+
+<div class="card"><div class="card-body">
+  <form method="post">
+    {% csrf_token %}
+    <div class="field">
+      <label for="name">Nombre del grupo</label>
+      <input type="text" name="name" id="name" value="{{ grupo.name }}" maxlength="150" required {% if protegido %}readonly{% endif %}>
+      {% if protegido %}<p class="help">Es un grupo del sistema: su nombre no se puede cambiar.</p>{% endif %}
+    </div>
+    {% if not protegido %}<button type="submit" class="btn">Guardar cambios</button>{% endif %}
+  </form>
+</div></div>
+
+<div class="card">
+  <div class="card-head"><h3>Miembros</h3><span class="badge">{{ miembros|length }}</span></div>
+  {% if miembros %}
+  <ul class="list">
+    {% for m in miembros %}
+    <li>
+      <div><span class="title">{{ m.username }}</span><div class="meta">{{ m.get_full_name|default:m.email|default:"" }}</div></div>
+      <form method="post" action="{% url 'eliminar_usuario_grupo' grupo.pk %}" class="inline" data-danger data-confirm-title="¿Quitar del grupo?" data-confirm="{{ m.username }} dejará de pertenecer a «{{ grupo.name }}»." data-confirm-button="Quitar">
+        {% csrf_token %}<input type="hidden" name="id_user" value="{{ m.pk }}">
+        <button class="btn danger small" type="submit">Quitar</button>
+      </form>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <div class="empty"><p>Este grupo todavía no tiene miembros.</p></div>
+  {% endif %}
+</div>
+
+<div class="card">
+  <div class="card-head"><h3>Agregar usuario</h3></div>
+  <div class="card-body">
+    {% if no_miembros %}
+    <form method="post" action="{% url 'agregar_usuario_grupo' grupo.pk %}" class="search" style="margin:0">
+      {% csrf_token %}
+      <select name="id_user" required style="flex:1">
+        <option value="">Selecciona un usuario</option>
+        {% for u in no_miembros %}<option value="{{ u.pk }}">{{ u.username }}{% if u.get_full_name %} — {{ u.get_full_name }}{% endif %}</option>{% endfor %}
+      </select>
+      <button class="btn" type="submit">Agregar</button>
+    </form>
+    {% else %}<p class="muted">Todos los usuarios ya pertenecen a este grupo.</p>{% endif %}
+  </div>
+</div>
+{% endblock %}

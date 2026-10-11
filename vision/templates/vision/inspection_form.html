@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Analizar estantería{% endblock %}
+{% block container_class %}narrow{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <p class="eyebrow">Visión artificial</p>
+    <h1>Analizar estantería</h1>
+    <p class="sub">Sube una foto: el modelo contará los productos y los comparará con tu inventario.</p>
+  </div>
+</div>
+
+<div class="card"><div class="card-body">
+  <form method="post" enctype="multipart/form-data" data-loading="Analizando imagen…">
+    {% csrf_token %}
+    <label class="dropzone" data-preview="#preview">
+      <strong data-filename>Arrastra una foto aquí</strong>
+      <span>o haz clic para elegirla</span>
+      <input type="file" name="image" accept="image/*" required>
+    </label>
+    <img id="preview" class="preview" alt="Vista previa" hidden style="margin-top:16px">
+    <div class="field" style="margin-top:20px">
+      <label for="notes">Observaciones (opcional)</label>
+      <input type="text" name="notes" id="notes" maxlength="255" placeholder="Ej: pasillo 3, estante superior">
+    </div>
+    <button type="submit" class="btn block">Analizar</button>
+  </form>
+</div></div>
+{% endblock %}

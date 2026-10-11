@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Inicio{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <p class="eyebrow">Resumen</p>
+    <h1>Hola, {{ user.first_name|default:user.username }}.</h1>
+    <p class="sub">Así está tu inventario hoy.</p>
+  </div>
+  <div class="actions">
+    {% if perms.vision.add_inspection %}<a class="btn" href="{% url 'inspection_create' %}">Analizar estantería</a>{% endif %}
+    {% if perms.inventory.add_stockmovement %}<a class="btn secondary" href="{% url 'movement_create' %}">Registrar movimiento</a>{% endif %}
+  </div>
+</div>
+
+<div class="grid cols-4">
+  <div class="card stat"><div class="label">Productos</div><div class="value">{{ total_productos }}</div><div class="hint">en {{ total_categorias }} categoría{{ total_categorias|pluralize:"s" }}</div></div>
+  <div class="card stat"><div class="label">Unidades en stock</div><div class="value">{{ unidades }}</div><div class="hint">suma de todo el inventario</div></div>
+  <div class="card stat {% if alertas_abiertas %}danger{% endif %}"><div class="label">Alertas abiertas</div><div class="value">{{ alertas_abiertas }}</div><div class="hint"><a href="{% url 'alert_list' %}">Ver alertas</a></div></div>
+  <div class="card stat"><div class="label">Análisis realizados</div><div class="value">{{ analisis }}</div><div class="hint">con visión artificial</div></div>
+</div>
+
+<div class="grid cols-2" style="margin-top:18px">
+  <div class="card">
+    <div class="card-head"><h3>Stock bajo</h3><a href="{% url 'product_list' %}" class="small-text">Ver productos</a></div>
+    {% if bajos %}
+    <ul class="list">
+      {% for p in bajos %}
+      <li>
+        <div><a class="title" href="{% url 'product_detail' p.pk %}">{{ p.name }}</a><div class="meta">Mínimo {{ p.min_stock }}</div></div>
+        <span class="badge {% if p.stock == 0 %}red{% else %}orange{% endif %}">{{ p.stock }} u.</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="empty"><h3>Todo en orden</h3><p>Ningún producto está por debajo de su mínimo.</p></div>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Últimos movimientos</h3><a href="{% url 'movement_list' %}" class="small-text">Ver todos</a></div>
+    {% if movimientos %}
+    <ul class="list">
+      {% for m in movimientos %}
+      <li>
+        <div><span class="title">{{ m.product.name }}</span><div class="meta">{{ m.created_at|date:"d M, H:i" }}</div></div>
+        <span class="badge {% if m.movement_type == 'IN' %}green{% elif m.movement_type == 'OUT' %}red{% else %}orange{% endif %}">{{ m.get_movement_type_display }} · {{ m.quantity }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="empty"><h3>Sin movimientos</h3><p>Aún no se registran entradas ni salidas.</p></div>
+    {% endif %}
+  </div>
+</div>
+
+{% if ultimos_analisis %}
+<div class="card" style="margin-top:18px">
+  <div class="card-head"><h3>Análisis recientes</h3><a href="{% url 'inspection_list' %}" class="small-text">Ver historial</a></div>
+  <ul class="list">
+    {% for a in ultimos_analisis %}
+    <li>
+      <a class="title" href="{% url 'inspection_detail' a.pk %}">Análisis #{{ a.pk }}</a>
+      <span class="meta">{{ a.created_at|date:"d M Y, H:i" }}</span>
+      <span class="badge blue">{{ a.total_detected }} unidades</span>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+{% endblock %}

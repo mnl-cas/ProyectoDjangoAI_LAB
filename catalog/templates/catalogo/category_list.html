@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Categorías{% endblock %}
+{% block container_class %}medium{% endblock %}
+
+{% block content %}
+<a class="back" href="{% url 'product_list' %}">‹ Productos</a>
+<div class="page-head">
+  <h1>Categorías</h1>
+  {% if perms.catalog.add_category %}<a href="{% url 'category_create' %}" class="btn">Nueva categoría</a>{% endif %}
+</div>
+
+<div class="card">
+  {% if categories %}
+  <ul class="list">
+    {% for c in categories %}
+    <li>
+      <div><span class="title">{{ c.name }}</span><div class="meta">{{ c.description|default:"Sin descripción" }}</div></div>
+      <div class="actions">
+        <span class="badge">{{ c.products.count }} producto{{ c.products.count|pluralize }}</span>
+        {% if perms.catalog.change_category %}<a href="{% url 'category_edit' c.pk %}" class="btn ghost small">Editar</a>{% endif %}
+        {% if perms.catalog.delete_category %}
+        <form method="post" action="{% url 'category_delete' c.pk %}" class="inline" data-danger data-confirm-title="¿Eliminar categoría?" data-confirm="«{{ c.name }}» se eliminará. Sus productos quedarán sin categoría." data-confirm-button="Eliminar">
+          {% csrf_token %}<button class="btn danger small" type="submit">Eliminar</button>
+        </form>
+        {% endif %}
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <div class="empty"><h3>No hay categorías</h3><p>Crea una para organizar tus productos.</p></div>
+  {% endif %}
+</div>
+{% endblock %}
