@@ -1,0 +1,44 @@
+{% extends "layouts/base.html" %}
+{% block title %}Registrar movimiento{% endblock %}
+{% block container_class %}narrow{% endblock %}
+
+{% block content %}
+<a class="back" href="{% url 'movement_list' %}">‹ Movimientos</a>
+<div class="page-head"><h1>Registrar movimiento</h1></div>
+
+<div class="card"><div class="card-body">
+  <form method="post">
+    {% csrf_token %}
+    <div class="field">
+      <label for="product">Producto</label>
+      <select name="product" id="product" class="form-select" required>
+        <option value="">---------</option>
+        {% for p in products %}
+        <option value="{{ p.pk }}" {% if valores.product == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label for="movement_type">Tipo de movimiento</label>
+      <select name="movement_type" id="movement_type" class="form-select">
+        {% for valor, nombre in tipos %}
+        <option value="{{ valor }}" {% if valores.movement_type == valor %}selected{% endif %}>{{ nombre }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label for="quantity">Cantidad</label>
+      <input type="number" name="quantity" id="quantity" class="form-control" min="0" value="{{ valores.quantity }}" required>
+    </div>
+    <div class="field">
+      <label for="description">Motivo / Observaciones</label>
+      <input type="text" name="description" id="description" class="form-control" maxlength="255" placeholder="Ej: compra a proveedor, merma, conteo físico" value="{{ valores.description }}">
+    </div>
+    <p class="help">«Ajuste» reemplaza el stock actual por la cantidad indicada (útil tras un conteo físico).</p>
+    <div class="form-actions">
+      <a href="{% url 'movement_list' %}" class="btn secondary">Cancelar</a>
+      <button type="submit" class="btn">Guardar movimiento</button>
+    </div>
+  </form>
+</div></div>
+{% endblock %}

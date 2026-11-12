@@ -1,0 +1,25 @@
+{% extends "layouts/auth_base.html" %}
+{% block title %}Iniciar sesión{% endblock %}
+
+{% block content %}
+<h1>Iniciar sesión</h1>
+<p class="sub">Accede a tu inventario con VisionStock.</p>
+
+<div class="card"><div class="card-body">
+  {% if form.errors %}<div class="alert-box">Usuario o contraseña incorrectos.</div>{% endif %}
+  <form method="post">
+    {% csrf_token %}
+    <div class="field">
+      <label for="username">Usuario</label>
+      <input type="text" name="username" id="username" value="{{ form.username.value|default:'' }}" autocomplete="username" autofocus required>
+    </div>
+    <div class="field">
+      <label for="password">Contraseña</label>
+      <input type="password" name="password" id="password" autocomplete="current-password" required>
+    </div>
+    <button type="submit" class="btn block">Entrar</button>
+  </form>
+</div></div>
+
+<p class="foot">¿No tienes cuenta? <a href="{% url 'registro' %}">Regístrate</a></p>
+{% endblock %}

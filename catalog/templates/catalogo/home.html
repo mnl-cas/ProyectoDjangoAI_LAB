@@ -1,0 +1,96 @@
+{% extends "layouts/base.html" %}
+{% block title %}Inicio{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <p class="eyebrow">Resumen</p>
+    <h1>Hola, {{ user.first_name|default:user.username }}.</h1>
+    <p class="sub">Así está tu inventario hoy.</p>
+  </div>
+  <div class="actions">
+    {% if perms.vision.add_inspection %}<a class="btn" href="{% url 'inspection_create' %}">Analizar estantería</a>{% endif %}
+    {% if perms.inventory.add_stockmovement %}<a class="btn secondary" href="{% url 'movement_create' %}">Registrar movimiento</a>{% endif %}
+  </div>
+</div>
+
+<div class="grid cols-4">
+  <div class="card stat"><div class="label">Productos</div><div class="value">{{ total_productos }}</div><div class="hint">en {{ total_categorias }} categoría{{ total_categorias|pluralize:"s" }}</div></div>
+  <div class="card stat"><div class="label">Unidades en stock</div><div class="value">{{ unidades }}</div><div class="hint">suma de todo el inventario</div></div>
+  <div class="card stat {% if alertas_abiertas %}danger{% endif %}"><div class="label">Alertas abiertas</div><div class="value">{{ alertas_abiertas }}</div><div class="hint"><a href="{% url 'alert_list' %}">Ver alertas</a></div></div>
+  <div class="card stat"><div class="label">Análisis realizados</div><div class="value">{{ analisis }}</div><div class="hint">con visión artificial</div></div>
+</div>
+
+<div class="grid cols-2" style="margin-top:18px">
+  <div class="card">
+    <div class="card-head"><h3>Stock bajo</h3><a href="{% url 'product_list' %}" class="small-text">Ver productos</a></div>
+    {% if bajos %}
+    <ul class="list">
+      {% for p in bajos %}
+      <li>
+        <div><a class="title" href="{% url 'product_detail' p.pk %}">{{ p.name }}</a><div class="meta">Mínimo {{ p.min_stock }}</div></div>
+        <span class="badge {% if p.stock == 0 %}red-solid{% else %}red{% endif %}">{{ p.stock }} u.</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="empty"><h3>Todo en orden</h3><p>Ningún producto está por debajo de su mínimo.</p></div>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Últimos movimientos</h3><a href="{% url 'movement_list' %}" class="small-text">Ver todos</a></div>
+    {% if movimientos %}
+    <ul class="list">
+      {% for m in movimientos %}
+      <li>
+        <div><span class="title">{{ m.product.name }}</span><div class="meta">{{ m.created_at|date:"d M, H:i" }}</div></div>
+        <span class="badge {% if m.movement_type == 'IN' %}green{% elif m.movement_type == 'OUT' %}ink{% else %}amber{% endif %}">{{ m.get_movement_type_display }} · {{ m.quantity }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="empty"><h3>Sin movimientos</h3><p>Aún no se registran entradas ni salidas.</p></div>
+    {% endif %}
+  </div>
+</div>
+
+{% if ultimos_analisis %}
+<section class="gallery" aria-labelledby="gal-title">
+  <div class="gallery-head">
+    <div>
+      <p class="eyebrow">Visión artificial</p>
+      <h2 id="gal-title">Análisis recientes</h2>
+    </div>
+    <a href="{% url 'inspection_list' %}" class="link-more">Ver historial <span aria-hidden="true">›</span></a>
+  </div>
+
+  <div class="carousel" role="region" aria-roledescription="carrusel" aria-label="Análisis recientes" tabindex="0">
+    {% for a in ultimos_analisis %}
+    <a class="carousel-item" href="{% url 'inspection_detail' a.pk %}" aria-label="Análisis #{{ a.pk }}, {{ a.total_detected }} unidades detectadas">
+      <div class="ci-media">
+        {% if a.annotated_image %}
+          <img src="{{ a.annotated_image.url }}" alt="Foto analizada del análisis #{{ a.pk }}" loading="lazy" draggable="false">
+        {% else %}
+          <div class="ci-ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="9" cy="11" r="1.6"/><path d="M21 16l-5-5-8 8"/></svg></div>
+        {% endif %}
+        <span class="ci-chip {% if a.applied %}ok{% endif %}">{% if a.applied %}Aplicado{% else %}Pendiente{% endif %}</span>
+      </div>
+      <div class="ci-body">
+        <div class="ci-top">
+          <span class="title">Análisis #{{ a.pk }}</span>
+          <time class="meta" datetime="{{ a.created_at|date:'c' }}">{{ a.created_at|date:"d M · H:i" }}</time>
+        </div>
+        <div class="ci-stats">
+          <div><b>{{ a.total_detected }}</b><span>unidades detectadas</span></div>
+          <div class="{% if a.unidentified %}warn{% endif %}"><b>{{ a.unidentified }}</b><span>sin identificar</span></div>
+        </div>
+        <span class="ci-go" aria-hidden="true">›</span>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "layouts/base.html" %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block container_class %}narrow{% endblock %}
+
+{% block content %}
+<a class="back" href="{% url 'category_list' %}">‹ Categorías</a>
+<div class="page-head"><h1>{{ titulo }}</h1></div>
+
+<div class="card"><div class="card-body">
+  <form method="post">
+    {% csrf_token %}
+    <div class="field">
+      <label for="name">Nombre de la categoría</label>
+      <input type="text" name="name" id="name" class="form-control" maxlength="100" value="{{ valores.name|default:'' }}" required>
+    </div>
+    <div class="field">
+      <label for="description">Descripción</label>
+      <textarea name="description" id="description" class="form-control" rows="3">{{ valores.description|default:'' }}</textarea>
+    </div>
+    <div class="form-actions">
+      <a href="{% url 'category_list' %}" class="btn secondary">Cancelar</a>
+      <button type="submit" class="btn">Guardar</button>
+    </div>
+  </form>
+</div></div>
+{% endblock %}

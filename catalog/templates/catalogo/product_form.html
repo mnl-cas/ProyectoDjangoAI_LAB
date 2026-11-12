@@ -1,0 +1,47 @@
+{% extends "layouts/base.html" %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block container_class %}narrow{% endblock %}
+
+{% block content %}
+<a class="back" href="{% if product %}{% url 'product_detail' product.pk %}{% else %}{% url 'product_list' %}{% endif %}">‹ Volver</a>
+<div class="page-head"><h1>{{ titulo }}</h1></div>
+
+<div class="card"><div class="card-body">
+  <form method="post">
+    {% csrf_token %}
+    <div class="field">
+      <label for="name">Nombre del producto</label>
+      <input type="text" name="name" id="name" class="form-control" maxlength="150" value="{{ valores.name|default:'' }}" required>
+    </div>
+    <div class="field">
+      <label for="category">Categoría{% if perms.catalog.add_category %} · <a href="{% url 'category_create' %}?next=product_create">crear categoría</a>{% endif %}</label>
+      <select name="category" id="category" class="form-select">
+        <option value="">---------</option>
+        {% for c in categories %}
+        <option value="{{ c.pk }}" {% if valores.category == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label for="price">Precio</label>
+      <input type="number" name="price" id="price" class="form-control" min="0" step="0.01" value="{{ valores.price|default:'' }}" required>
+    </div>
+    <div class="field">
+      <label for="stock">Stock disponible</label>
+      <input type="number" name="stock" id="stock" class="form-control" min="0" value="{{ valores.stock|default:0 }}">
+    </div>
+    <div class="field">
+      <label for="min_stock">Stock mínimo</label>
+      <input type="number" name="min_stock" id="min_stock" class="form-control" min="0" value="{{ valores.min_stock|default:0 }}">
+    </div>
+    <div class="field">
+      <label for="description">Descripción del producto</label>
+      <textarea name="description" id="description" class="form-control" rows="3">{{ valores.description|default:'' }}</textarea>
+    </div>
+    <div class="form-actions">
+      <a href="{% url 'product_list' %}" class="btn secondary">Cancelar</a>
+      <button type="submit" class="btn">Guardar</button>
+    </div>
+  </form>
+</div></div>
+{% endblock %}

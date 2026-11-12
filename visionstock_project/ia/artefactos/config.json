@@ -1,0 +1,11 @@
+{
+  "yolo_archivo": "sku110k-yolo11-s640.pt",
+  "yolo_confianza": 0.25,
+  "owl_modelo": "google/owlv2-base-patch16-ensemble",
+  "embedding_modelo": "facebook/dinov2-small",
+  "umbral_similitud": 0.6,
+  "margen_similitud": 0.1,
+  "max_lado": 1600,
+  "max_recortes": 150,
+  "area_minima": 0.0015
+}
